@@ -1,0 +1,7 @@
+./
+target/
+!src/
+!.classpath
+!.project
+!.gitignore
+!pom.xml
