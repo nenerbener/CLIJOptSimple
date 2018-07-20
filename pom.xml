@@ -16,5 +16,10 @@
 			<version>4.12</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.shared</groupId>
+			<artifactId>maven-shared-utils</artifactId>
+			<version>3.0.1</version>
+		</dependency>
   </dependencies>
 </project>

@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.AssertionError;
 
+import org.apache.maven.shared.utils.StringUtils;
+
 /**
  * Jopt-simple commandline processing class for googleSRT commandline program
  * @author mm
@@ -54,8 +56,7 @@ public class CLIJOptSimple {
 	public boolean readCLI(String[] args) throws OptionException, NullPointerException {
 
 		String regexInputFile = "^https?://(www.)?youtube.com/watch\\?v=[\\w]{11}"; //Youtube.com page regex
-//		String regexInputFile = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";	//General web,ftp,file page regex	
-		String regexOutputDir = "^[^-+&@#/%?=~|!:,;].+"; //Regex to avoid mkdir to make non-alphabet starting output dir
+		String regexOutputDir = "^[^-+&@#%?=~|!:,;].+"; //Regex to avoid mkdir to make non-alphabet starting output dir
 		OptionSet options; //post-parsed options
 		String outputDirDefault = System.getProperty( "java.io.tmpdir" ); //returns static, is this legal?
 
@@ -70,16 +71,18 @@ public class CLIJOptSimple {
 			options = optionParser.parse(args);
 			try {
 				inputFile = (String) options.valueOf("inputFile");
-			} catch (NullPointerException e) {
-				System.out.println("inputFile read as null");
-				System.exit(0);
+				if (StringUtils.isEmpty(inputFile)) {
+					throw new NullPointerException("Null pointer or empty string of option inputFile");
+				}
+			} 
+			catch (NullPointerException e) {
+				throw e;
 			}
-			outputDir = (String) options.valueOf("outputDir");
 			try {
+				outputDir = (String) options.valueOf("outputDir");
 				regex(regexOutputDir).convert(outputDir.toString()).equals(null); 
 			} catch (ValueConversionException e) {
-				System.out.println("Cannot parse argument '" + outputDir.toString() + "' of option outputDir");
-				System.exit(0);;
+				throw e;
 			}
 			fileOutputDir = new File(outputDir.toString());
 			if (!fileOutputDir.exists())  {
@@ -91,14 +94,11 @@ public class CLIJOptSimple {
 			t=options.has("t");
 			r=options.has("r");
 			return true; //successful parse
-		} catch (OptionException oe) {
-			System.out.println(oe.getMessage());
-			System.exit(0);
-		} catch (NullPointerException npe) {
-			System.out.println(npe.getMessage());
-			System.exit(0);
+		} catch (OptionException e) {
+			throw e;
+		} catch (NullPointerException e) {
+			throw e;
 		} 
-		return false; //exception occurred
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class CLIJOptSimple {
 				.defaultsTo(outputDirDefault);
 		optionParser.accepts("help","commandline help - flag").forHelp();
 
-		// check for help option
+		// check for help option. handle exceptions inside method
 		try {
 			options = optionParser.parse(args);
 		} catch (OptionException e) {
@@ -141,14 +141,12 @@ public class CLIJOptSimple {
 			System.out.println(e.getMessage());
 			System.exit(0);
 		}
-
-		// print help to standard out
-		if (options.has("help")) {
+		if (options.has("help")||options.has("hel")||options.has("he")||options.has("h")) {
 			try {
 				optionParser.printHelpOn(System.out);
+				System.exit(0);
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
-				System.exit(0);
 			}
 		}
 	}	
@@ -199,7 +197,8 @@ public class CLIJOptSimple {
 		CLIJOptSimple cli = new CLIJOptSimple();
 		cli.helpCLI(args);
 		try {
-			cli.readCLI(args);
+			Boolean bl=cli.readCLI(args);
+			System.out.println("Success!");
 		} catch (OptionException e) {
 			System.out.println(e.getMessage());
 			System.exit(0);
