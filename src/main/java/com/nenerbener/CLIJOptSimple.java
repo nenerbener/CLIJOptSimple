@@ -36,7 +36,8 @@ public class CLIJOptSimple {
 
 	private String[] args;
 	private String inputFile;
-	private File outputDir;
+	private String outputDir;
+	private File fileOutputDir;
 	private Boolean d;
 	private Boolean t;
 	private Boolean r;
@@ -56,16 +57,17 @@ public class CLIJOptSimple {
 	 */
 	public boolean readCLI(String[] args) {
 
-		String regexInputFile = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";		
-		String regexOutputDir = "^[^-+&@#/%?=~|!:,;].+";		
+		String regexInputFile = "^https?://(www.)?youtube.com/watch\\?v=[\\w]{11}"; //Youtube.com page regex
+//		String regexInputFile = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";	//General web,ftp,file page regex	
+		String regexOutputDir = "^[^-+&@#/%?=~|!:,;].+"; //Regex to avoid mkdir to make non-alphabet starting output dir
 		OptionSet options; //post-parsed options
-		File outputDirDefault = new File( System.getProperty( "java.io.tmpdir" ) );
+		String outputDirDefault = System.getProperty( "java.io.tmpdir" ); //returns static, is this legal?
 
 		//create optionParser (arguments and characters template to parse against)
 		OptionParser optionParser = new OptionParser("dtr");
 		optionParser.accepts("inputFile").withRequiredArg().withValuesConvertedBy(regex(regexInputFile));
-		OptionSpec<File> outputDirOS=optionParser.accepts("outputDir").withRequiredArg().ofType(File.class)
-				.defaultsTo(outputDirDefault);
+		optionParser.accepts("outputDir").withRequiredArg().withValuesConvertedBy(regex(regexOutputDir))
+			.defaultsTo(outputDirDefault);
 
 		//perform parsing of args against created optionParser
 		try {
@@ -76,15 +78,16 @@ public class CLIJOptSimple {
 				System.out.println("inputFile read as null");
 				System.exit(0);
 			}
-			outputDir = (File) options.valueOf("outputDir");
+			outputDir = (String) options.valueOf("outputDir");
 			try {
 				regex(regexOutputDir).convert(outputDir.toString()).equals(null); 
 			} catch (ValueConversionException e) {
 				System.out.println("Cannot parse argument '" + outputDir.toString() + "' of option outputDir");
 				System.exit(0);;
 			}
-			if (!outputDir.exists())  {
-				if (outputDir.mkdir()) {
+			fileOutputDir = new File(outputDir.toString());
+			if (!fileOutputDir.exists())  {
+				if (fileOutputDir.mkdir()) {
 					System.out.println("Output directory is created!");
 				}
 			}
@@ -149,11 +152,17 @@ public class CLIJOptSimple {
 	public void setInputFile(String inputFile) {
 		this.inputFile = inputFile;
 	}
-	public File getOutputDir() {
+	public String getOutputDir() {
 		return outputDir;
 	}
-	public void setOutputDir(File outputDir) {
+	public void setOutputDir(String outputDir) {
 		this.outputDir = outputDir;
+	}
+	public File getFileOutputDir() {
+		return fileOutputDir;
+	}
+	public void setFileOutputDir(File fileOutputDir) {
+		this.fileOutputDir = fileOutputDir;
 	}
 	public Boolean getD() {
 		return d;
@@ -196,7 +205,7 @@ public class CLIJOptSimple {
 //		}
 		
 		if (!cli.getInputFile().equals(null)) System.out.println("input file: " + cli.getInputFile().toString());
-		if (!cli.getOutputDir().equals(null)) System.out.println("output dir: " + cli.getOutputDir().toString() + " exists? " +cli.getOutputDir().exists());
+		if (!cli.getFileOutputDir().equals(null)) System.out.println("output dir: " + cli.getFileOutputDir().toString() + " exists? " +cli.getFileOutputDir().exists());
 		System.out.println("flags: "); 
 		if (!cli.getD().equals(null)) System.out.println("d: " + cli.getD());
 		if (!cli.getT().equals(null)) System.out.println("t: " + cli.getT());
