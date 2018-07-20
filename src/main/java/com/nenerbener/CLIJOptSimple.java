@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.nenerbener;
 
 import joptsimple.OptionException;
@@ -24,7 +21,6 @@ import java.lang.AssertionError;
 /**
  * Jopt-simple commandline processing class for googleSRT commandline program
  * @author mm
- *
  */
 public class CLIJOptSimple {
 
@@ -44,8 +40,7 @@ public class CLIJOptSimple {
 	
 	/**
 	 * <p>
-	 * <u> Parse command line, access params using setter and getter methods. </u>
-	 * NullPointerException and OptionExceptions are caught and program terminated.  
+	 * Parse command line, access params using setter and getter methods.
 	 * </p>
 	 * @param
 	 * inputFile Input video URL (e.g., Youtube video) 
@@ -54,8 +49,9 @@ public class CLIJOptSimple {
 	 * @param d - debug flag
 	 * @param t - add readable title to caption file 
 	 * @param r - add readable track to caption title
+	 * 
 	 */
-	public boolean readCLI(String[] args) {
+	public boolean readCLI(String[] args) throws OptionException, NullPointerException {
 
 		String regexInputFile = "^https?://(www.)?youtube.com/watch\\?v=[\\w]{11}"; //Youtube.com page regex
 //		String regexInputFile = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";	//General web,ftp,file page regex	
@@ -106,8 +102,19 @@ public class CLIJOptSimple {
 	}
 
 	/**
-	 * Displays help menu
-	 * @throws IOException
+	 * <p>
+	 * Displays help menu.  
+	 * Program terminates on --help|-h. 
+	 * Routine returns if help flags not detected.
+	 * </p>
+	 * @param
+	 * inputFile Input video URL (e.g., Youtube video) 
+	 * @param
+	 * outputDir Output directory to extract video closed caption files
+	 * @param d - debug flag
+	 * @param t - add readable title to caption file 
+	 * @param r - add readable track to caption title
+	 * 
 	 */
 	public void helpCLI(String[] args) {
 
@@ -128,10 +135,10 @@ public class CLIJOptSimple {
 		try {
 			options = optionParser.parse(args);
 		} catch (OptionException e) {
-//			throw e;
+			System.out.println(e.getMessage());
 			System.exit(0);
 		} catch (NullPointerException e) {
-//			throw e;
+			System.out.println(e.getMessage());
 			System.exit(0);
 		}
 
@@ -186,23 +193,20 @@ public class CLIJOptSimple {
 	/**
 	 * main program for testing
 	 * @param args - test args
-	 * @throws Exception 
 	 */
 	public static void main(String[] args) {
 		
 		CLIJOptSimple cli = new CLIJOptSimple();
-//		try {
-			cli.helpCLI(args);
-//		} catch (IOException e) {
-//			System.exit(0);
-//		} catch (NullPointerException e) {
-//			System.exit(0);
-//		} 
-//		try {
+		cli.helpCLI(args);
+		try {
 			cli.readCLI(args);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		} catch (OptionException e) {
+			System.out.println(e.getMessage());
+			System.exit(0);
+		} catch (NullPointerException e) {
+			System.out.println(e.getMessage());
+			System.exit(0);
+		}
 		
 		if (!cli.getInputFile().equals(null)) System.out.println("input file: " + cli.getInputFile().toString());
 		if (!cli.getFileOutputDir().equals(null)) System.out.println("output dir: " + cli.getFileOutputDir().toString() + " exists? " +cli.getFileOutputDir().exists());
