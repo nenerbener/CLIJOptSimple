@@ -66,10 +66,10 @@ public class CLIJOptSimple {
 		String regexOutputDir = "^[^-+&@#%?=~|!:,;].+"; //Regex to avoid mkdir to make non-alphabet starting output dir
 		OptionSet options; //post-parsed options
 		String outputDirDefault = System.getProperty( "java.io.tmpdir" ); //returns static, is this legal?
-		LOG.info("ReadCLI: classNamen: " + MethodHandles.lookup().lookupClass());
-		LOG.info("ReadCLI: regexInputFile: " + regexInputFile);
-		LOG.info("ReadCLI: regexOutputDir: " + regexOutputDir);
-		LOG.info("ReadCLI: outputDirDefault: " + outputDirDefault);
+		LOG.info("className: " + MethodHandles.lookup().lookupClass());
+		LOG.info("regexInputFile: " + regexInputFile);
+		LOG.info("regexOutputDir: " + regexOutputDir);
+		LOG.info("outputDirDefault: " + outputDirDefault);
 
 		//create optionParser (arguments and characters template to parse against)
 		OptionParser optionParser = new OptionParser("dtr");
@@ -83,22 +83,25 @@ public class CLIJOptSimple {
 			try {
 				inputFile = (String) options.valueOf("inputFile");
 				if (StringUtils.isEmpty(inputFile)) {
+					LOG.error("inputFile is null or empty: " + inputFile);
 					throw new NullPointerException("Null pointer or empty string of option inputFile");
 				}
 			} 
 			catch (NullPointerException e) {
+				LOG.warn(e.getMessage());
 				throw e;
 			}
 			try {
 				outputDir = (String) options.valueOf("outputDir");
 				regex(regexOutputDir).convert(outputDir.toString()).equals(null); 
 			} catch (ValueConversionException e) {
+				LOG.warn(e.getMessage());
 				throw e;
 			}
 			fileOutputDir = new File(outputDir.toString());
 			if (!fileOutputDir.exists())  {
 				if (fileOutputDir.mkdir()) {
-					System.out.println("Output directory is created!");
+					LOG.info("Output directory is created: " + fileOutputDir);
 				}
 			}
 			d=options.has("d");
@@ -106,8 +109,10 @@ public class CLIJOptSimple {
 			r=options.has("r");
 			return true; //successful parse
 		} catch (OptionException e) {
+//			LOG.error(e.getMessage());
 			throw e;
 		} catch (NullPointerException e) {
+//			LOG.error(e.getMessage());
 			throw e;
 		} 
 	}
@@ -205,24 +210,30 @@ public class CLIJOptSimple {
 	 */
 	public static void main(String[] args) {
 		
+		LOG.trace("Trace Message!");
+		LOG.debug("Debug Message!");
+		LOG.info("Info Message!");
+		LOG.warn("Warn Message!");
+		LOG.error("Error Message!");
+		
 		CLIJOptSimple cli = new CLIJOptSimple();
 		cli.helpCLI(args);
 		try {
 			Boolean bl=cli.readCLI(args);
-			System.out.println("Success!");
+			LOG.info("Success!");
 		} catch (OptionException e) {
-			System.out.println(e.getMessage());
+			LOG.error(e.getMessage());
 			System.exit(0);
 		} catch (NullPointerException e) {
-			System.out.println(e.getMessage());
+			LOG.error(e.getMessage());
 			System.exit(0);
 		}
 		
-		if (!cli.getInputFile().equals(null)) System.out.println("input file: " + cli.getInputFile().toString());
-		if (!cli.getFileOutputDir().equals(null)) System.out.println("output dir: " + cli.getFileOutputDir().toString() + " exists? " +cli.getFileOutputDir().exists());
-		System.out.println("flags: "); 
-		if (!cli.getD().equals(null)) System.out.println("d: " + cli.getD());
-		if (!cli.getT().equals(null)) System.out.println("t: " + cli.getT());
-		if (!cli.getR().equals(null)) System.out.println("r: " + cli.getR());
+		LOG.info("input file: " + cli.getInputFile().toString());
+		LOG.info("output dir: " + cli.getFileOutputDir().toString() + " exists? " +cli.getFileOutputDir().exists());
+		LOG.info("flags: "); 
+		LOG.info("d: " + cli.getD());
+		LOG.info("t: " + cli.getT());
+		LOG.info("r: " + cli.getR());
 	}
 }
