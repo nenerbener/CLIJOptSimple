@@ -17,6 +17,10 @@ import static org.junit.rules.ExpectedException.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.AssertionError;
+import java.lang.invoke.MethodHandles;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.apache.maven.shared.utils.StringUtils;
 
@@ -25,6 +29,9 @@ import org.apache.maven.shared.utils.StringUtils;
  * @author mm
  */
 public class CLIJOptSimple {
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(MethodHandles.lookup().lookupClass());
 
 	/**
 	 * create CLIJOptSimple object
@@ -59,6 +66,10 @@ public class CLIJOptSimple {
 		String regexOutputDir = "^[^-+&@#%?=~|!:,;].+"; //Regex to avoid mkdir to make non-alphabet starting output dir
 		OptionSet options; //post-parsed options
 		String outputDirDefault = System.getProperty( "java.io.tmpdir" ); //returns static, is this legal?
+		LOG.info("ReadCLI: classNamen: " + MethodHandles.lookup().lookupClass());
+		LOG.info("ReadCLI: regexInputFile: " + regexInputFile);
+		LOG.info("ReadCLI: regexOutputDir: " + regexOutputDir);
+		LOG.info("ReadCLI: outputDirDefault: " + outputDirDefault);
 
 		//create optionParser (arguments and characters template to parse against)
 		OptionParser optionParser = new OptionParser("dtr");

@@ -1,5 +1,6 @@
-./
 target/
+aaa/
+logs/
 nohup.out
 !src/
 !.classpath
