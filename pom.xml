@@ -17,6 +17,11 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>25.1-jre</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.maven.shared</groupId>
 			<artifactId>maven-shared-utils</artifactId>
 			<version>3.0.1</version>

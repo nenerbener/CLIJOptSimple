@@ -22,7 +22,8 @@ import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.maven.shared.utils.StringUtils;
+//import org.apache.maven.shared.utils.StringUtils;
+import com.google.common.base.*;
 
 /**
  * Jopt-simple commandline processing class for googleSRT commandline program
@@ -39,13 +40,14 @@ public class CLIJOptSimple {
 	public CLIJOptSimple() {
 	}
 
-	private String[] args;
+//	private String[] args;
 	private String inputFile;
 	private String outputDir;
 	private File fileOutputDir;
 	private Boolean d;
 	private Boolean t;
 	private Boolean r;
+	private Boolean m;
 	
 	/**
 	 * <p>
@@ -58,11 +60,12 @@ public class CLIJOptSimple {
 	 * @param d - debug flag
 	 * @param t - add readable title to caption file 
 	 * @param r - add readable track to caption title
+	 * @param m - add caption+timing data to files
 	 * 
 	 */
 	public boolean readCLI(String[] args) throws OptionException, NullPointerException {
 
-		String regexInputFile = "^https?://(www.)?youtube.com/watch\\?v=[\\w]{11}"; //Youtube.com page regex
+		String regexInputFile = "^https?://(www.)?youtube.com/watch\\?v=[\\w-]{11}"; //Youtube.com page regex
 		String regexOutputDir = "^[^-+&@#%?=~|!:,;].+"; //Regex to avoid mkdir to make non-alphabet starting output dir
 		OptionSet options; //post-parsed options
 		String outputDirDefault = System.getProperty( "java.io.tmpdir" ); //returns static, is this legal?
@@ -72,7 +75,10 @@ public class CLIJOptSimple {
 		LOG.info("outputDirDefault: " + outputDirDefault);
 
 		//create optionParser (arguments and characters template to parse against)
-		OptionParser optionParser = new OptionParser("dtr");
+		OptionParser optionParser = new OptionParser("dtrm");
+//		optionParser.accepts("inputFile").withRequiredArg().withValuesConvertedBy(regex(regexInputFile)).ofType(String.class);
+//		optionParser.accepts("outputDir").withRequiredArg().withValuesConvertedBy(regex(regexOutputDir)).ofType(String.class)
+//			.defaultsTo(outputDirDefault);
 		optionParser.accepts("inputFile").withRequiredArg().withValuesConvertedBy(regex(regexInputFile));
 		optionParser.accepts("outputDir").withRequiredArg().withValuesConvertedBy(regex(regexOutputDir))
 			.defaultsTo(outputDirDefault);
@@ -82,7 +88,8 @@ public class CLIJOptSimple {
 			options = optionParser.parse(args);
 			try {
 				inputFile = (String) options.valueOf("inputFile");
-				if (StringUtils.isEmpty(inputFile)) {
+				if (Strings.isNullOrEmpty(inputFile)) { 
+//				if (StringUtils.isEmpty(inputFile)) {
 					LOG.error("inputFile is null or empty: " + inputFile);
 					throw new NullPointerException("Null pointer or empty string of option inputFile");
 				}
@@ -100,13 +107,14 @@ public class CLIJOptSimple {
 			}
 			fileOutputDir = new File(outputDir.toString());
 			if (!fileOutputDir.exists())  {
-				if (fileOutputDir.mkdir()) {
+				if (fileOutputDir.mkdirs()) {
 					LOG.info("Output directory is created: " + fileOutputDir);
 				}
 			}
 			d=options.has("d");
 			t=options.has("t");
 			r=options.has("r");
+			m=options.has("m");
 			return true; //successful parse
 		} catch (OptionException e) {
 //			LOG.error(e.getMessage());
@@ -142,6 +150,7 @@ public class CLIJOptSimple {
 		optionParser.accepts("d","debug - flag");
 		optionParser.accepts("t","add descriptive title from URL - flag");
 		optionParser.accepts("r","add descriptive track title - flag");
+		optionParser.accepts("m","add timing/cc information - flag");
 		optionParser.accepts("inputFile","input URL").withRequiredArg().ofType(String.class);
 		OptionSpec<File> outputDirOS=optionParser.accepts("outputDir","output directory").withRequiredArg().ofType(File.class)
 				.defaultsTo(outputDirDefault);
@@ -203,6 +212,12 @@ public class CLIJOptSimple {
 	public void setR(Boolean r) {
 		this.r = r;
 	}
+	public Boolean getM() {
+		return m;
+	}
+	public void setM(Boolean m) {
+		this.m = m;
+	}
 	
 	/**
 	 * main program for testing
@@ -210,6 +225,7 @@ public class CLIJOptSimple {
 	 */
 	public static void main(String[] args) {
 		
+		// for understanding slf4j
 		LOG.trace("Trace Message!");
 		LOG.debug("Debug Message!");
 		LOG.info("Info Message!");
@@ -235,5 +251,6 @@ public class CLIJOptSimple {
 		LOG.info("d: " + cli.getD());
 		LOG.info("t: " + cli.getT());
 		LOG.info("r: " + cli.getR());
+		LOG.info("m: " + cli.getM());
 	}
 }
